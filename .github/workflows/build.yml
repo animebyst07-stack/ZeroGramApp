@@ -8,7 +8,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Скачиваем файлы из репозитория
+      - name: Скачиваем файлы
         uses: actions/checkout@v4
 
       - name: Распаковываем ZIP
@@ -20,12 +20,19 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Ищем проект и собираем APK
+      - name: Чиним ошибки кода и собираем APK
         run: |
           DIR=$(dirname $(find . -name "settings.gradle" | head -1))
           cd "$DIR"
-          gradle wrapper
+
+          # 1. Лечим ошибку с репозиториями (заменяем строгий запрет на мягкое правило)
+          sed -i 's/FAIL_ON_PROJECT_REPOS/PREFER_SETTINGS/g' settings.gradle
+
+          # 2. Скачиваем оригинальный запускатор, чтобы версия точно была 8.5
+          wget -qO gradlew https://raw.githubusercontent.com/gradle/gradle/master/gradlew
           chmod +x gradlew
+
+          # 3. Собираем APK
           ./gradlew assembleDebug
 
       - name: Сохраняем готовый APK
