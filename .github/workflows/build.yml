@@ -11,8 +11,8 @@ jobs:
       - name: Скачиваем файлы
         uses: actions/checkout@v4
 
-      - name: Распаковываем ZIP
-        run: unzip ZeroGram.zip
+      - name: Распаковываем TAR.GZ архив
+        run: tar -xzf ZeroGram.tar.gz
 
       - name: Устанавливаем Java
         uses: actions/setup-java@v4
@@ -25,15 +25,10 @@ jobs:
         with:
           gradle-version: '8.5'
 
-      - name: Чиним ошибки и собираем APK
+      - name: Собираем APK
         run: |
           DIR=$(dirname $(find . -name "settings.gradle" | head -1))
           cd "$DIR"
-
-          # Лечим ошибку с репозиториями
-          sed -i 's/FAIL_ON_PROJECT_REPOS/PREFER_SETTINGS/g' settings.gradle
-
-          # Собираем APK напрямую (без файла gradlew)
           gradle assembleDebug
 
       - name: Сохраняем готовый APK
